@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurants - FoodieExpress</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">FoodieExpress</div>
+        <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="restaurants.html" class="active">Restaurants</a>
+            <a href="cart.html">Cart <span id="cartCount" class="cart-badge"></span></a>
+            <a href="orders.html">Orders</a>
+            <a href="dashboard.html">Admin</a>
+            <a href="login.html" class="btn-nav" id="authBtn">Login</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>All Restaurants</h2>
+        <div class="search-filter-bar">
+            <input type="text" id="searchInput" placeholder="Search by name, cuisine, or location..." oninput="searchRestaurants()">
+            <select id="cuisineFilter" onchange="searchRestaurants()">
+                <option value="">All Cuisines</option>
+                <option value="South Indian">South Indian</option>
+                <option value="North Indian">North Indian</option>
+                <option value="Italian">Italian</option>
+                <option value="Chinese">Chinese</option>
+            </select>
+            <select id="ratingFilter" onchange="searchRestaurants()">
+                <option value="">Any Rating</option>
+                <option value="4">4+ Stars</option>
+                <option value="3">3+ Stars</option>
+            </select>
+        </div>
+        <div class="restaurant-grid" id="restaurantList"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let allRestaurants = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthButton();
+            updateCartCount();
+            const params = new URLSearchParams(window.location.search);
+            const search = params.get('search');
+            if (search) {
+                document.getElementById('searchInput').value = search;
+            }
+            loadRestaurants();
+        });
+
+        function loadRestaurants() {
+            const query = document.getElementById('searchInput').value;
+            fetch('/api/restaurants/?search=' + encodeURIComponent(query))
+                .then(res => res.json())
+                .then(data => {
+                    allRestaurants = data;
+                    searchRestaurants();
+                });
+        }
+
+        function searchRestaurants() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const cuisine = document.getElementById('cuisineFilter').value;
+            const rating = parseFloat(document.getElementById('ratingFilter').value) || 0;
+            let filtered = allRestaurants.filter(r => {
+                const matchSearch = !query ||
+                    r.restaurant_name.toLowerCase().includes(query) ||
+                    r.cuisine.toLowerCase().includes(query) ||
+                    r.location.toLowerCase().includes(query);
+                const matchCuisine = !cuisine || r.cuisine === cuisine;
+                const matchRating = !rating || r.rating >= rating;
+                return matchSearch && matchCuisine && matchRating;
+            });
+            renderRestaurants(filtered);
+        }
+
+        function renderRestaurants(data) {
+            const container = document.getElementById('restaurantList');
+            if (data.length === 0) {
+                container.innerHTML = '<p class="no-data">No restaurants found.</p>';
+                return;
+            }
+            container.innerHTML = data.map(r => `
+                <div class="card" onclick="viewMenu('${r.restaurant_name}')">
+                    <div class="card-image">
+                        <img src="${r.image || '/images/placeholder.svg'}" alt="${r.restaurant_name}">
+                    </div>
+                    <h3>${r.restaurant_name}</h3>
+                    <p class="cuisine">${r.cuisine}</p>
+                    <p class="location">Location: ${r.location}</p>
+                    <p class="owner">Owner: ${r.owner_name}</p>
+                    <div class="rating">${'&#11088;'.repeat(Math.floor(r.rating))} ${r.rating}</div>
+                    <button class="btn-primary">View Menu</button>
+                </div>
+            `).join('');
+        }
+
+        function viewMenu(restaurantName) {
+            window.location.href = 'menu.html?restaurant=' + encodeURIComponent(restaurantName);
+        }
+    </script>
+</body>
+</html>

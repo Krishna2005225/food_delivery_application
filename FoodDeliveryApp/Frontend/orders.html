@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - FoodieExpress</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">FoodieExpress</div>
+        <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="restaurants.html">Restaurants</a>
+            <a href="cart.html">Cart <span id="cartCount" class="cart-badge"></span></a>
+            <a href="orders.html" class="active">Orders</a>
+            <a href="dashboard.html">Admin</a>
+            <a href="login.html" class="btn-nav" id="authBtn">Login</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Your Orders</h2>
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('current', this)">Current Orders</button>
+            <button class="tab" onclick="showTab('history', this)">Order History</button>
+        </div>
+        <div id="currentOrders"></div>
+        <div id="orderHistory" style="display:none;"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let allOrders = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthButton();
+            updateCartCount();
+            loadOrders();
+        });
+
+        function loadOrders() {
+            const customer = localStorage.getItem('customerName');
+            if (!customer) {
+                document.getElementById('currentOrders').innerHTML = '<p class="no-data">Please login to view orders.</p>';
+                return;
+            }
+            fetch('/api/orders/?customer=' + encodeURIComponent(customer))
+                .then(res => res.json())
+                .then(data => {
+                    allOrders = data;
+                    renderCurrentOrders();
+                    renderOrderHistory();
+                });
+        }
+
+        function showTab(tab, btn) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('currentOrders').style.display = tab === 'current' ? 'block' : 'none';
+            document.getElementById('orderHistory').style.display = tab === 'history' ? 'block' : 'none';
+        }
+
+        function renderCurrentOrders() {
+            const container = document.getElementById('currentOrders');
+            const current = allOrders.filter(o => o.delivery_status !== 'Delivered' && o.delivery_status !== 'Cancelled');
+            if (current.length === 0) {
+                container.innerHTML = '<p class="no-data">No current orders.</p>';
+                return;
+            }
+            container.innerHTML = current.map(o => {
+                const steps = ['Preparing', 'Out for Delivery', 'Delivered'];
+                const currentIdx = steps.indexOf(o.delivery_status);
+                return `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3>Order #${o.order_id}</h3>
+                            <span class="status-badge status-${o.delivery_status.toLowerCase().replace(/\s/g, '-')}">${o.delivery_status}</span>
+                        </div>
+                        <p><strong>Items:</strong> ${o.order_items}</p>
+                        <p><strong>Total:</strong> &#8377;${o.total_amount}</p>
+                        <p><strong>Payment:</strong> <span class="payment-badge payment-${o.payment_status.toLowerCase()}">${o.payment_status}</span></p>
+
+                        <div class="timeline">
+                            ${steps.map((step, i) => `
+                                <div class="timeline-step ${i <= currentIdx ? 'completed' : ''} ${i === currentIdx ? 'active' : ''}">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-label">${step}</div>
+                                </div>
+                            `).join('')}
+                            <div class="timeline-line"></div>
+                            <div class="timeline-line-fill" style="width: ${currentIdx >= 0 ? (currentIdx / (steps.length - 1)) * 100 : 0}%"></div>
+                        </div>
+
+                        ${o.delivery_status === 'Preparing' ? `<button class="btn-danger" onclick="cancelOrder(${o.order_id})">Cancel Order</button>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderOrderHistory() {
+            const container = document.getElementById('orderHistory');
+            const history = allOrders.filter(o => o.delivery_status === 'Delivered' || o.delivery_status === 'Cancelled');
+            if (history.length === 0) {
+                container.innerHTML = '<p class="no-data">No order history.</p>';
+                return;
+            }
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${history.map(o => `
+                            <tr>
+                                <td>#${o.order_id}</td>
+                                <td>${o.order_items}</td>
+                                <td>&#8377;${o.total_amount}</td>
+                                <td><span class="payment-badge payment-${o.payment_status.toLowerCase()}">${o.payment_status}</span></td>
+                                <td><span class="status-badge status-${o.delivery_status.toLowerCase()}">${o.delivery_status}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function cancelOrder(orderId) {
+            const order = allOrders.find(o => o.order_id === orderId);
+            if (!order) return;
+            fetch('/api/orders/update/' + orderId + '/', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({...order, delivery_status: 'Cancelled'})
+            })
+            .then(() => {
+                alert('Order cancelled!');
+                loadOrders();
+            });
+        }
+    </script>
+</body>
+</html>

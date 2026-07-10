@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Delivery App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">FoodieExpress</div>
+        <button class="hamburger" id="hamburger" onclick="toggleMenu()">&#9776;</button>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html" class="active">Home</a>
+            <a href="restaurants.html">Restaurants</a>
+            <a href="cart.html">Cart <span id="cartCount" class="cart-badge"></span></a>
+            <a href="orders.html">Orders</a>
+            <a href="dashboard.html">Admin</a>
+            <a href="login.html" class="btn-nav" id="authBtn">Login</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Delicious Food Delivered to Your Door</h1>
+            <p>Order from your favorite restaurants and get it delivered fast</p>
+            <div class="search-bar">
+                <input type="text" id="homeSearch" placeholder="Search restaurants or food items...">
+                <button onclick="searchFromHome()">Search</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="featured-section">
+        <div class="section-header">
+            <h2>Featured Restaurants</h2>
+            <div class="filter-group">
+                <select id="cuisineFilter" onchange="filterRestaurants()">
+                    <option value="">All Cuisines</option>
+                    <option value="South Indian">South Indian</option>
+                    <option value="North Indian">North Indian</option>
+                    <option value="Italian">Italian</option>
+                    <option value="Chinese">Chinese</option>
+                </select>
+                <select id="ratingFilter" onchange="filterRestaurants()">
+                    <option value="">Any Rating</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="3">3+ Stars</option>
+                </select>
+            </div>
+        </div>
+        <div class="restaurant-grid" id="featuredRestaurants"></div>
+    </section>
+
+    <section class="featured-section">
+        <div class="section-header">
+            <h2>Popular Food Items</h2>
+            <div class="filter-group">
+                <select id="categoryFilter" onchange="filterFoods()">
+                    <option value="">All Categories</option>
+                    <option value="Main Course">Main Course</option>
+                    <option value="Starters">Starters</option>
+                    <option value="Desserts">Desserts</option>
+                    <option value="Beverages">Beverages</option>
+                </select>
+                <select id="availabilityFilter" onchange="filterFoods()">
+                    <option value="">All</option>
+                    <option value="Available">Available</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                </select>
+            </div>
+        </div>
+        <div class="food-grid" id="featuredFoods"></div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2026 FoodieExpress. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let allRestaurants = [];
+        let allFoods = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthButton();
+            loadFeaturedRestaurants();
+            loadFeaturedFoods();
+            updateCartCount();
+        });
+
+        function loadFeaturedRestaurants() {
+            fetch('/api/restaurants/')
+                .then(res => res.json())
+                .then(data => {
+                    allRestaurants = data;
+                    renderRestaurants(data);
+                });
+        }
+
+        function renderRestaurants(data) {
+            const container = document.getElementById('featuredRestaurants');
+            if (data.length === 0) {
+                container.innerHTML = '<p class="no-data">No restaurants found.</p>';
+                return;
+            }
+            container.innerHTML = data.map(r => `
+                <div class="card" onclick="viewMenu('${r.restaurant_name}')">
+                    <div class="card-icon">&#127969;</div>
+                    <h3>${r.restaurant_name}</h3>
+                    <p class="cuisine">${r.cuisine}</p>
+                    <p class="location">${r.location}</p>
+                    <div class="rating">${'&#11088;'.repeat(Math.floor(r.rating))} ${r.rating}</div>
+                    <button class="btn-primary">View Menu</button>
+                </div>
+            `).join('');
+        }
+
+        function filterRestaurants() {
+            const cuisine = document.getElementById('cuisineFilter').value;
+            const rating = parseFloat(document.getElementById('ratingFilter').value) || 0;
+            let filtered = allRestaurants;
+            if (cuisine) filtered = filtered.filter(r => r.cuisine === cuisine);
+            if (rating) filtered = filtered.filter(r => r.rating >= rating);
+            renderRestaurants(filtered);
+        }
+
+        function loadFeaturedFoods() {
+            fetch('/api/foods/')
+                .then(res => res.json())
+                .then(data => {
+                    allFoods = data;
+                    renderFoods(data);
+                });
+        }
+
+        function renderFoods(data) {
+            const container = document.getElementById('featuredFoods');
+            if (data.length === 0) {
+                container.innerHTML = '<p class="no-data">No food items found.</p>';
+                return;
+            }
+            container.innerHTML = data.map(f => `
+                <div class="card">
+                    <div class="card-icon">&#127860;</div>
+                    <h3>${f.food_name}</h3>
+                    <p class="restaurant">${f.restaurant_name}</p>
+                    <p class="category">${f.category}</p>
+                    <div class="price">&#8377;${f.price}</div>
+                    <span class="availability ${f.availability === 'Available' ? 'available' : 'out-of-stock'}">${f.availability}</span>
+                    ${f.availability === 'Available' ? `<button class="btn-primary" onclick="addToCart('${f.food_name}', ${f.price}, '${f.restaurant_name}')">Add to Cart</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function filterFoods() {
+            const category = document.getElementById('categoryFilter').value;
+            const availability = document.getElementById('availabilityFilter').value;
+            let filtered = allFoods;
+            if (category) filtered = filtered.filter(f => f.category === category);
+            if (availability) filtered = filtered.filter(f => f.availability === availability);
+            renderFoods(filtered);
+        }
+
+        function searchFromHome() {
+            const query = document.getElementById('homeSearch').value.trim();
+            if (!query) return;
+            window.location.href = 'restaurants.html?search=' + encodeURIComponent(query);
+        }
+
+        function viewMenu(restaurantName) {
+            window.location.href = 'menu.html?restaurant=' + encodeURIComponent(restaurantName);
+        }
+
+        function addToCart(foodName, price, restaurantName) {
+            const customer = localStorage.getItem('customerName');
+            if (!customer) {
+                alert('Please login first!');
+                window.location.href = 'login.html';
+                return;
+            }
+            fetch('/api/cart/add/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    cart_id: Date.now(),
+                    customer_name: customer,
+                    food_name: foodName,
+                    quantity: 1,
+                    price: price
+                })
+            })
+            .then(res => res.json())
+            .then(() => {
+                alert(foodName + ' added to cart!');
+                updateCartCount();
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart - FoodieExpress</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">FoodieExpress</div>
+        <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="restaurants.html">Restaurants</a>
+            <a href="cart.html" class="active">Cart <span id="cartCount" class="cart-badge"></span></a>
+            <a href="orders.html">Orders</a>
+            <a href="dashboard.html">Admin</a>
+            <a href="login.html" class="btn-nav" id="authBtn">Login</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Your Cart</h2>
+        <div id="cartItems"></div>
+        <div class="cart-summary" id="cartSummary" style="display:none;">
+            <div class="cart-breakdown">
+                <div class="cart-row"><span>Subtotal</span><span id="subtotal">&#8377;0</span></div>
+                <div class="cart-row"><span>Delivery Fee</span><span>&#8377;40</span></div>
+                <div class="cart-row"><span>Tax (5%)</span><span id="taxAmount">&#8377;0</span></div>
+                <hr>
+                <div class="cart-row total"><span>Total</span><span id="grandTotal">&#8377;0</span></div>
+            </div>
+            <button class="btn-primary btn-full" onclick="checkout()">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let cartData = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthButton();
+            loadCart();
+        });
+
+        function loadCart() {
+            const customer = localStorage.getItem('customerName');
+            if (!customer) {
+                document.getElementById('cartItems').innerHTML = '<p class="no-data">Please login to view your cart.</p>';
+                return;
+            }
+            fetch('/api/cart/?customer=' + encodeURIComponent(customer))
+                .then(res => res.json())
+                .then(data => {
+                    cartData = data;
+                    renderCart();
+                });
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            const summary = document.getElementById('cartSummary');
+            if (cartData.length === 0) {
+                container.innerHTML = '<p class="no-data">Your cart is empty.</p>';
+                summary.style.display = 'none';
+                updateCartCount();
+                return;
+            }
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Food Item</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${cartData.map(item => `
+                            <tr>
+                                <td>${item.food_name}</td>
+                                <td>&#8377;${item.price}</td>
+                                <td>
+                                    <div class="quantity-control">
+                                        <button onclick="updateQty(${item.cart_id}, ${item.quantity - 1}, ${item.price}, '${item.customer_name}', '${item.food_name}')">-</button>
+                                        <span>${item.quantity}</span>
+                                        <button onclick="updateQty(${item.cart_id}, ${item.quantity + 1}, ${item.price}, '${item.customer_name}', '${item.food_name}')">+</button>
+                                    </div>
+                                </td>
+                                <td>&#8377;${item.total_price}</td>
+                                <td><button class="btn-danger" onclick="removeFromCart(${item.cart_id})">Remove</button></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            updateLiveTotal();
+            summary.style.display = 'block';
+        }
+
+        function updateLiveTotal() {
+            const subtotal = cartData.reduce((sum, item) => sum + item.total_price, 0);
+            const deliveryFee = cartData.length > 0 ? 40 : 0;
+            const tax = Math.round(subtotal * 0.05);
+            const total = subtotal + deliveryFee + tax;
+            document.getElementById('subtotal').innerHTML = '&#8377;' + subtotal;
+            document.getElementById('taxAmount').innerHTML = '&#8377;' + tax;
+            document.getElementById('grandTotal').innerHTML = '&#8377;' + total;
+        }
+
+        function updateQty(cartId, newQty, price, customerName, foodName) {
+            if (newQty < 1) {
+                removeFromCart(cartId);
+                return;
+            }
+            fetch('/api/cart/update/' + cartId + '/', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    cart_id: cartId,
+                    customer_name: customerName,
+                    food_name: foodName,
+                    quantity: newQty,
+                    price: price
+                })
+            })
+            .then(() => loadCart());
+        }
+
+        function removeFromCart(cartId) {
+            fetch('/api/cart/delete/' + cartId + '/', { method: 'DELETE' })
+                .then(() => loadCart());
+        }
+
+        function checkout() {
+            const customer = localStorage.getItem('customerName');
+            if (!customer) {
+                alert('Please login first!');
+                return;
+            }
+            if (cartData.length === 0) {
+                alert('Cart is empty!');
+                return;
+            }
+
+            const orderItems = cartData.map(item => item.food_name + ' x' + item.quantity).join(', ');
+            const totalAmount = cartData.reduce((sum, item) => sum + item.total_price, 0);
+            const deliveryFee = 40;
+            const tax = Math.round(totalAmount * 0.05);
+            const grandTotal = totalAmount + deliveryFee + tax;
+
+            const orderId = Date.now();
+            fetch('/api/orders/add/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    order_id: orderId,
+                    customer_name: customer,
+                    restaurant_name: cartData[0] ? cartData[0].food_name : 'Multiple',
+                    order_items: orderItems,
+                    total_amount: grandTotal,
+                    payment_status: 'Paid',
+                    delivery_status: 'Preparing'
+                })
+            })
+            .then(res => res.json())
+            .then(() => {
+                const deletePromises = cartData.map(item =>
+                    fetch('/api/cart/delete/' + item.cart_id + '/', { method: 'DELETE' })
+                );
+                return Promise.all(deletePromises);
+            })
+            .then(() => {
+                alert('Order placed successfully! Order #' + orderId);
+                window.location.href = 'orders.html';
+            });
+        }
+    </script>
+</body>
+</html>

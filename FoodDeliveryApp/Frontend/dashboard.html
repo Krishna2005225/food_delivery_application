@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - FoodieExpress</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">FoodieExpress</div>
+        <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="restaurants.html">Restaurants</a>
+            <a href="cart.html">Cart</a>
+            <a href="orders.html">Orders</a>
+            <a href="dashboard.html" class="active">Admin</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Admin Dashboard</h2>
+        <div class="dashboard-tabs">
+            <button class="dash-tab active" onclick="showSection('customers', this)">Customers</button>
+            <button class="dash-tab" onclick="showSection('restaurants', this)">Restaurants</button>
+            <button class="dash-tab" onclick="showSection('foods', this)">Food Items</button>
+            <button class="dash-tab" onclick="showSection('orders', this)">Orders</button>
+        </div>
+
+        <div id="customersSection" class="dash-section">
+            <h3>Manage Customers</h3>
+            <button class="btn-primary" onclick="showForm('addCustomerForm')">+ Add Customer</button>
+            <div id="addCustomerForm" class="inline-form" style="display:none;">
+                <input type="number" id="cId" placeholder="Customer ID">
+                <input type="text" id="cName" placeholder="Full Name">
+                <input type="email" id="cEmail" placeholder="Email">
+                <input type="text" id="cPhone" placeholder="Phone">
+                <input type="text" id="cAddress" placeholder="Address">
+                <input type="text" id="cCity" placeholder="City">
+                <button class="btn-primary" onclick="addCustomer()">Save</button>
+                <button class="btn-secondary" onclick="hideForm('addCustomerForm')">Cancel</button>
+            </div>
+            <div id="customerList"></div>
+        </div>
+
+        <div id="restaurantsSection" class="dash-section" style="display:none;">
+            <h3>Manage Restaurants</h3>
+            <button class="btn-primary" onclick="showForm('addRestaurantForm')">+ Add Restaurant</button>
+            <div id="addRestaurantForm" class="inline-form" style="display:none;">
+                <input type="number" id="rId" placeholder="Restaurant ID">
+                <input type="text" id="rName" placeholder="Restaurant Name">
+                <input type="text" id="rOwner" placeholder="Owner Name">
+                <input type="text" id="rLocation" placeholder="Location">
+                <input type="text" id="rCuisine" placeholder="Cuisine">
+                <input type="text" id="rImage" placeholder="Image URL">
+                <input type="number" id="rRating" placeholder="Rating" step="0.1">
+                <button class="btn-primary" onclick="addRestaurant()">Save</button>
+                <button class="btn-secondary" onclick="hideForm('addRestaurantForm')">Cancel</button>
+            </div>
+            <div id="restaurantList"></div>
+        </div>
+
+        <div id="foodsSection" class="dash-section" style="display:none;">
+            <h3>Manage Food Items</h3>
+            <button class="btn-primary" onclick="showForm('addFoodForm')">+ Add Food Item</button>
+            <div id="addFoodForm" class="inline-form" style="display:none;">
+                <input type="number" id="fId" placeholder="Food ID">
+                <input type="text" id="fRestaurant" placeholder="Restaurant Name">
+                <input type="text" id="fName" placeholder="Food Name">
+                <input type="text" id="fCategory" placeholder="Category">
+                <input type="text" id="fImage" placeholder="Image URL">
+                <input type="number" id="fPrice" placeholder="Price">
+                <select id="fAvailability">
+                    <option value="Available">Available</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                </select>
+                <button class="btn-primary" onclick="addFood()">Save</button>
+                <button class="btn-secondary" onclick="hideForm('addFoodForm')">Cancel</button>
+            </div>
+            <div id="foodList"></div>
+        </div>
+
+        <div id="ordersSection" class="dash-section" style="display:none;">
+            <h3>Manage Orders</h3>
+            <div id="orderList"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllCustomers();
+            loadAllRestaurants();
+            loadAllFoods();
+            loadAllOrders();
+        });
+
+        function showSection(section, btn) {
+            document.querySelectorAll('.dash-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(section + 'Section').style.display = 'block';
+            btn.classList.add('active');
+        }
+
+        function showForm(formId) { document.getElementById(formId).style.display = 'flex'; }
+        function hideForm(formId) { document.getElementById(formId).style.display = 'none'; }
+
+        function loadAllCustomers() {
+            fetch('/api/customers/')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('customerList');
+                    if (data.length === 0) { container.innerHTML = '<p class="no-data">No customers registered.</p>'; return; }
+                    container.innerHTML = '<table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Actions</th></tr></thead><tbody>' +
+                        data.map(c => '<tr><td>' + c.customer_id + '</td><td>' + c.full_name + '</td><td>' + c.email + '</td><td>' + c.phone + '</td><td>' + c.city + '</td><td><button class="btn-danger" onclick="deleteCustomer(' + c.customer_id + ')">Delete</button></td></tr>').join('') +
+                        '</tbody></table>';
+                });
+        }
+
+        function addCustomer() {
+            fetch('/api/customers/add/', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    customer_id: parseInt(document.getElementById('cId').value),
+                    full_name: document.getElementById('cName').value,
+                    email: document.getElementById('cEmail').value,
+                    phone: document.getElementById('cPhone').value,
+                    address: document.getElementById('cAddress').value,
+                    city: document.getElementById('cCity').value
+                })
+            }).then(() => { hideForm('addCustomerForm'); loadAllCustomers(); });
+        }
+
+        function deleteCustomer(id) {
+            if (confirm('Delete this customer?'))
+                fetch('/api/customers/delete/' + id + '/', { method: 'DELETE' }).then(() => loadAllCustomers());
+        }
+
+        function loadAllRestaurants() {
+            fetch('/api/restaurants/')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('restaurantList');
+                    if (data.length === 0) { container.innerHTML = '<p class="no-data">No restaurants registered.</p>'; return; }
+                    container.innerHTML = '<table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Owner</th><th>Location</th><th>Cuisine</th><th>Rating</th><th>Actions</th></tr></thead><tbody>' +
+                        data.map(r => '<tr><td>' + r.restaurant_id + '</td><td>' + r.restaurant_name + '</td><td>' + r.owner_name + '</td><td>' + r.location + '</td><td>' + r.cuisine + '</td><td>' + r.rating + '</td><td><button class="btn-danger" onclick="deleteRestaurant(' + r.restaurant_id + ')">Delete</button></td></tr>').join('') +
+                        '</tbody></table>';
+                });
+        }
+
+        function addRestaurant() {
+            fetch('/api/restaurants/add/', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    restaurant_id: parseInt(document.getElementById('rId').value),
+                    restaurant_name: document.getElementById('rName').value,
+                    owner_name: document.getElementById('rOwner').value,
+                    location: document.getElementById('rLocation').value,
+                    cuisine: document.getElementById('rCuisine').value,
+                    image: document.getElementById('rImage').value,
+                    rating: parseFloat(document.getElementById('rRating').value) || 0
+                })
+            }).then(() => { hideForm('addRestaurantForm'); loadAllRestaurants(); });
+        }
+
+        function deleteRestaurant(id) {
+            if (confirm('Delete this restaurant?'))
+                fetch('/api/restaurants/delete/' + id + '/', { method: 'DELETE' }).then(() => loadAllRestaurants());
+        }
+
+        function loadAllFoods() {
+            fetch('/api/foods/')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('foodList');
+                    if (data.length === 0) { container.innerHTML = '<p class="no-data">No food items available.</p>'; return; }
+                    container.innerHTML = '<table class="data-table"><thead><tr><th>ID</th><th>Food Name</th><th>Restaurant</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr></thead><tbody>' +
+                        data.map(f => '<tr><td>' + f.food_id + '</td><td>' + f.food_name + '</td><td>' + f.restaurant_name + '</td><td>' + f.category + '</td><td>&#8377;' + f.price + '</td><td><span class="availability ' + (f.availability === 'Available' ? 'available' : 'out-of-stock') + '">' + f.availability + '</span></td><td><button class="btn-danger" onclick="deleteFood(' + f.food_id + ')">Delete</button></td></tr>').join('') +
+                        '</tbody></table>';
+                });
+        }
+
+        function addFood() {
+            fetch('/api/foods/add/', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    food_id: parseInt(document.getElementById('fId').value),
+                    restaurant_name: document.getElementById('fRestaurant').value,
+                    food_name: document.getElementById('fName').value,
+                    category: document.getElementById('fCategory').value,
+                    image: document.getElementById('fImage').value,
+                    price: parseFloat(document.getElementById('fPrice').value),
+                    availability: document.getElementById('fAvailability').value
+                })
+            }).then(() => { hideForm('addFoodForm'); loadAllFoods(); });
+        }
+
+        function deleteFood(id) {
+            if (confirm('Delete this food item?'))
+                fetch('/api/foods/delete/' + id + '/', { method: 'DELETE' }).then(() => loadAllFoods());
+        }
+
+        function loadAllOrders() {
+            fetch('/api/orders/')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('orderList');
+                    if (data.length === 0) { container.innerHTML = '<p class="no-data">No orders placed.</p>'; return; }
+                    container.innerHTML = '<table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Delivery</th><th>Actions</th></tr></thead><tbody>' +
+                        data.map(o => '<tr><td>#' + o.order_id + '</td><td>' + o.customer_name + '</td><td>' + o.order_items + '</td><td>&#8377;' + o.total_amount + '</td><td><span class="payment-badge payment-' + o.payment_status.toLowerCase() + '">' + o.payment_status + '</span></td><td><select onchange="updateDeliveryStatus(' + o.order_id + ', this.value)" class="status-select"><option value="Preparing" ' + (o.delivery_status === 'Preparing' ? 'selected' : '') + '>Preparing</option><option value="Out for Delivery" ' + (o.delivery_status === 'Out for Delivery' ? 'selected' : '') + '>Out for Delivery</option><option value="Delivered" ' + (o.delivery_status === 'Delivered' ? 'selected' : '') + '>Delivered</option><option value="Cancelled" ' + (o.delivery_status === 'Cancelled' ? 'selected' : '') + '>Cancelled</option></select></td><td><button class="btn-danger" onclick="deleteOrder(' + o.order_id + ')">Delete</button></td></tr>').join('') +
+                        '</tbody></table>';
+                });
+        }
+
+        function updateDeliveryStatus(orderId, status) {
+            fetch('/api/orders/')
+                .then(res => res.json())
+                .then(orders => {
+                    const order = orders.find(o => o.order_id === orderId);
+                    if (order) {
+                        order.delivery_status = status;
+                        fetch('/api/orders/update/' + orderId + '/', {
+                            method: 'PUT', headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(order)
+                        }).then(() => loadAllOrders());
+                    }
+                });
+        }
+
+        function deleteOrder(id) {
+            if (confirm('Delete this order?'))
+                fetch('/api/orders/delete/' + id + '/', { method: 'DELETE' }).then(() => loadAllOrders());
+        }
+    </script>
+</body>
+</html>

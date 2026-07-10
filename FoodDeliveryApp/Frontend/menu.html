@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - FoodieExpress</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">FoodieExpress</div>
+        <button class="hamburger" onclick="toggleMenu()">&#9776;</button>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="restaurants.html">Restaurants</a>
+            <a href="cart.html">Cart <span id="cartCount" class="cart-badge"></span></a>
+            <a href="orders.html">Orders</a>
+            <a href="dashboard.html">Admin</a>
+            <a href="login.html" class="btn-nav" id="authBtn">Login</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 id="menuTitle">Menu</h2>
+        <div class="search-filter-bar">
+            <input type="text" id="searchFood" placeholder="Search food items..." oninput="filterFoods()">
+            <select id="categoryFilter" onchange="filterFoods()">
+                <option value="">All Categories</option>
+            </select>
+            <select id="availFilter" onchange="filterFoods()">
+                <option value="">All Availability</option>
+                <option value="Available">Available</option>
+                <option value="Out of Stock">Out of Stock</option>
+            </select>
+        </div>
+        <div class="food-grid" id="foodList"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let allFoods = [];
+        let currentRestaurant = '';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthButton();
+            updateCartCount();
+            const params = new URLSearchParams(window.location.search);
+            currentRestaurant = params.get('restaurant') || '';
+            if (currentRestaurant) {
+                document.getElementById('menuTitle').textContent = 'Menu - ' + currentRestaurant;
+                loadMenu(currentRestaurant);
+            } else {
+                loadAllFoods();
+            }
+        });
+
+        function loadMenu(restaurant) {
+            fetch('/api/foods/?restaurant=' + encodeURIComponent(restaurant))
+                .then(res => res.json())
+                .then(data => {
+                    allFoods = data;
+                    populateCategories(data);
+                    renderFoods(data);
+                });
+        }
+
+        function loadAllFoods() {
+            fetch('/api/foods/')
+                .then(res => res.json())
+                .then(data => {
+                    allFoods = data;
+                    populateCategories(data);
+                    renderFoods(data);
+                });
+        }
+
+        function populateCategories(foods) {
+            const categories = [...new Set(foods.map(f => f.category))];
+            const select = document.getElementById('categoryFilter');
+            select.innerHTML = '<option value="">All Categories</option>' +
+                categories.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+        }
+
+        function filterFoods() {
+            const search = document.getElementById('searchFood').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const avail = document.getElementById('availFilter').value;
+            let filtered = allFoods.filter(f => {
+                const matchSearch = !search || f.food_name.toLowerCase().includes(search);
+                const matchCategory = !category || f.category === category;
+                const matchAvail = !avail || f.availability === avail;
+                return matchSearch && matchCategory && matchAvail;
+            });
+            renderFoods(filtered);
+        }
+
+        function renderFoods(data) {
+            const container = document.getElementById('foodList');
+            if (data.length === 0) {
+                container.innerHTML = '<p class="no-data">No food items found.</p>';
+                return;
+            }
+            container.innerHTML = data.map(f => `
+                <div class="card">
+                    <div class="card-image">
+                        <img src="${f.image || '/images/placeholder.svg'}" alt="${f.food_name}">
+                    </div>
+                    <h3>${f.food_name}</h3>
+                    <p class="restaurant">${f.restaurant_name}</p>
+                    <p class="category">Category: ${f.category}</p>
+                    <div class="price">&#8377;${f.price}</div>
+                    <span class="availability ${f.availability === 'Available' ? 'available' : 'out-of-stock'}">${f.availability}</span>
+                    ${f.availability === 'Available' ? `
+                        <div class="quantity-control">
+                            <button onclick="changeQty(${f.food_id}, -1)">-</button>
+                            <span id="qty-${f.food_id}">1</span>
+                            <button onclick="changeQty(${f.food_id}, 1)">+</button>
+                        </div>
+                        <button class="btn-primary" onclick="addToCart(${f.food_id}, '${f.food_name}', ${f.price}, '${f.restaurant_name}')">Add to Cart</button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function changeQty(foodId, delta) {
+            const qtyEl = document.getElementById('qty-' + foodId);
+            let qty = parseInt(qtyEl.textContent) + delta;
+            if (qty < 1) qty = 1;
+            qtyEl.textContent = qty;
+        }
+
+        function addToCart(foodId, foodName, price, restaurantName) {
+            const customer = localStorage.getItem('customerName');
+            if (!customer) {
+                alert('Please login first!');
+                window.location.href = 'login.html';
+                return;
+            }
+            const qty = parseInt(document.getElementById('qty-' + foodId).textContent);
+            fetch('/api/cart/add/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    cart_id: Date.now() + foodId,
+                    customer_name: customer,
+                    food_name: foodName,
+                    quantity: qty,
+                    price: price
+                })
+            })
+            .then(res => res.json())
+            .then(() => {
+                alert(foodName + ' (x' + qty + ') added to cart!');
+                updateCartCount();
+            });
+        }
+    </script>
+</body>
+</html>
