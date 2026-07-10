@@ -87,3 +87,13 @@ This project simulates a food delivery platform where customers can browse resta
 ## Repository
 
 https://github.com/Krishna2005225/food_delivery_application
+<img width="1822" height="716" alt="image" src="https://github.com/user-attachments/assets/5394cb62-9f66-4c05-9845-a04f15e3ef99" />
+<img width="1872" height="765" alt="image" src="https://github.com/user-attachments/assets/fbfbefbc-21fe-4b5e-b50e-b4b82dcc16c7" />
+<img width="816" height="852" alt="image" src="https://github.com/user-attachments/assets/d01e5e4f-38d2-4641-a9d4-862f83bfe5f5" />
+<img width="922" height="491" alt="image" src="https://github.com/user-attachments/assets/005b7295-eb3e-488d-986d-c7e1b7ae6f46" />
+<img width="1352" height="737" alt="image" src="https://github.com/user-attachments/assets/ab168595-6dab-47d7-90de-4d239a596b6d" />
+<img width="1467" height="748" alt="image" src="https://github.com/user-attachments/assets/b98e5d4d-e844-48fc-8aed-f9f32d0742df" />
+<img width="1507" height="763" alt="image" src="https://github.com/user-attachments/assets/3363b811-ee79-4d57-9585-486c66a19606" />
+<img width="1480" height="830" alt="image" src="https://github.com/user-attachments/assets/872344a3-a6c1-40d2-a014-05e91d2a0548" />
+
+
