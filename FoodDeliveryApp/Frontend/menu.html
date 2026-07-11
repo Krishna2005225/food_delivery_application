@@ -103,7 +103,7 @@
             container.innerHTML = data.map(f => `
                 <div class="card">
                     <div class="card-image">
-                        <img src="${f.image || '/images/placeholder.svg'}" alt="${f.food_name}">
+                        <img src="${f.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2220%22 fill=%22%23999%22>No Image</text></svg>'}" alt="${f.food_name}" onerror="this.style.background='linear-gradient(135deg,#ff6b35,#f7931e)';this.style.height='200px';this.style.fontSize='16px';this.style.color='white';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center'">
                     </div>
                     <h3>${f.food_name}</h3>
                     <p class="restaurant">${f.restaurant_name}</p>

@@ -38,11 +38,20 @@
     <script src="script.js"></script>
     <script>
         let cartData = [];
+        let foodImageMap = {};
 
         document.addEventListener('DOMContentLoaded', function() {
             updateAuthButton();
-            loadCart();
+            loadFoodImages().then(() => loadCart());
         });
+
+        function loadFoodImages() {
+            return fetch('/api/foods/')
+                .then(res => res.json())
+                .then(foods => {
+                    foods.forEach(f => { foodImageMap[f.food_name] = f.image; });
+                });
+        }
 
         function loadCart() {
             const customer = localStorage.getItem('customerName');
@@ -71,6 +80,7 @@
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th>Image</th>
                             <th>Food Item</th>
                             <th>Price</th>
                             <th>Quantity</th>
@@ -81,6 +91,7 @@
                     <tbody>
                         ${cartData.map(item => `
                             <tr>
+                                <td><img src="${foodImageMap[item.food_name] || ''}" alt="${item.food_name}" style="width:55px;height:40px;object-fit:cover;border-radius:6px;" onerror="this.style.background='#f0f0f0';this.style.width='55px';this.style.height='40px'"></td>
                                 <td>${item.food_name}</td>
                                 <td>&#8377;${item.price}</td>
                                 <td>

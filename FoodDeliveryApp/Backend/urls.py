@@ -1,6 +1,6 @@
 import os
 from django.urls import path
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from . import views
 
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'Frontend')
@@ -18,11 +18,25 @@ def serve_file(filename, content_type='text/html'):
 
 
 def serve_image(request, filename):
+    if filename.startswith('http://') or filename.startswith('https://'):
+        return HttpResponseRedirect(filename)
     filepath = os.path.join(FRONTEND_DIR, 'images', filename)
     if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8') as f:
+        ext = os.path.splitext(filepath)[1].lower()
+        content_types = {
+            '.svg': 'image/svg+xml',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.webp': 'image/webp',
+        }
+        content_type = content_types.get(ext, 'application/octet-stream')
+        mode = 'r' if ext == '.svg' else 'rb'
+        encoding = 'utf-8' if ext == '.svg' else None
+        with open(filepath, mode, encoding=encoding) as f:
             content = f.read()
-        return HttpResponse(content, content_type='image/svg+xml')
+        return HttpResponse(content, content_type=content_type)
     return HttpResponse('Not found', status=404)
 
 

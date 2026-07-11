@@ -143,8 +143,8 @@
                 .then(data => {
                     const container = document.getElementById('restaurantList');
                     if (data.length === 0) { container.innerHTML = '<p class="no-data">No restaurants registered.</p>'; return; }
-                    container.innerHTML = '<table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Owner</th><th>Location</th><th>Cuisine</th><th>Rating</th><th>Actions</th></tr></thead><tbody>' +
-                        data.map(r => '<tr><td>' + r.restaurant_id + '</td><td>' + r.restaurant_name + '</td><td>' + r.owner_name + '</td><td>' + r.location + '</td><td>' + r.cuisine + '</td><td>' + r.rating + '</td><td><button class="btn-danger" onclick="deleteRestaurant(' + r.restaurant_id + ')">Delete</button></td></tr>').join('') +
+                    container.innerHTML = '<table class="data-table"><thead><tr><th>Image</th><th>ID</th><th>Name</th><th>Owner</th><th>Location</th><th>Cuisine</th><th>Rating</th><th>Actions</th></tr></thead><tbody>' +
+                        data.map(r => '<tr><td><img src="' + (r.image || '') + '" alt="' + r.restaurant_name + '" style="width:60px;height:45px;object-fit:cover;border-radius:6px;" onerror="this.style.background=\'#f0f0f0\';this.style.width=\'60px\';this.style.height=\'45px\'"></td><td>' + r.restaurant_id + '</td><td>' + r.restaurant_name + '</td><td>' + r.owner_name + '</td><td>' + r.location + '</td><td>' + r.cuisine + '</td><td>' + r.rating + '</td><td><button class="btn-danger" onclick="deleteRestaurant(' + r.restaurant_id + ')">Delete</button></td></tr>').join('') +
                         '</tbody></table>';
                 });
         }
@@ -175,8 +175,8 @@
                 .then(data => {
                     const container = document.getElementById('foodList');
                     if (data.length === 0) { container.innerHTML = '<p class="no-data">No food items available.</p>'; return; }
-                    container.innerHTML = '<table class="data-table"><thead><tr><th>ID</th><th>Food Name</th><th>Restaurant</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr></thead><tbody>' +
-                        data.map(f => '<tr><td>' + f.food_id + '</td><td>' + f.food_name + '</td><td>' + f.restaurant_name + '</td><td>' + f.category + '</td><td>&#8377;' + f.price + '</td><td><span class="availability ' + (f.availability === 'Available' ? 'available' : 'out-of-stock') + '">' + f.availability + '</span></td><td><button class="btn-danger" onclick="deleteFood(' + f.food_id + ')">Delete</button></td></tr>').join('') +
+                    container.innerHTML = '<table class="data-table"><thead><tr><th>Image</th><th>ID</th><th>Food Name</th><th>Restaurant</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr></thead><tbody>' +
+                        data.map(f => '<tr><td><img src="' + (f.image || '') + '" alt="' + f.food_name + '" style="width:60px;height:45px;object-fit:cover;border-radius:6px;" onerror="this.style.background=\'#f0f0f0\';this.style.width=\'60px\';this.style.height=\'45px\'"></td><td>' + f.food_id + '</td><td>' + f.food_name + '</td><td>' + f.restaurant_name + '</td><td>' + f.category + '</td><td>&#8377;' + f.price + '</td><td><span class="availability ' + (f.availability === 'Available' ? 'available' : 'out-of-stock') + '">' + f.availability + '</span></td><td><button class="btn-danger" onclick="deleteFood(' + f.food_id + ')">Delete</button></td></tr>').join('') +
                         '</tbody></table>';
                 });
         }

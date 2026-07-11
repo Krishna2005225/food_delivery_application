@@ -106,7 +106,9 @@
             }
             container.innerHTML = data.map(r => `
                 <div class="card" onclick="viewMenu('${r.restaurant_name}')">
-                    <div class="card-icon">&#127969;</div>
+                    <div class="card-image">
+                        <img src="${r.image}" alt="${r.restaurant_name}" onerror="this.style.background='linear-gradient(135deg,#ff6b35,#f7931e)';this.alt='${r.restaurant_name}';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.style.height='200px';this.style.fontSize='18px';this.style.color='white'">
+                    </div>
                     <h3>${r.restaurant_name}</h3>
                     <p class="cuisine">${r.cuisine}</p>
                     <p class="location">${r.location}</p>
@@ -142,7 +144,9 @@
             }
             container.innerHTML = data.map(f => `
                 <div class="card">
-                    <div class="card-icon">&#127860;</div>
+                    <div class="card-image">
+                        <img src="${f.image}" alt="${f.food_name}" onerror="this.style.background='linear-gradient(135deg,#ff6b35,#f7931e)';this.alt='${f.food_name}';this.style.height='200px';this.style.fontSize='16px';this.style.color='white';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center'">
+                    </div>
                     <h3>${f.food_name}</h3>
                     <p class="restaurant">${f.restaurant_name}</p>
                     <p class="category">${f.category}</p>

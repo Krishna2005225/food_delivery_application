@@ -90,7 +90,7 @@
             container.innerHTML = data.map(r => `
                 <div class="card" onclick="viewMenu('${r.restaurant_name}')">
                     <div class="card-image">
-                        <img src="${r.image || '/images/placeholder.svg'}" alt="${r.restaurant_name}">
+                        <img src="${r.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2220%22 fill=%22%23999%22>No Image</text></svg>'}" alt="${r.restaurant_name}" onerror="this.style.background='linear-gradient(135deg,#ff6b35,#f7931e)';this.style.height='200px';this.style.fontSize='18px';this.style.color='white';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center'">
                     </div>
                     <h3>${r.restaurant_name}</h3>
                     <p class="cuisine">${r.cuisine}</p>

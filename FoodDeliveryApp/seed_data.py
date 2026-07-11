@@ -27,7 +27,7 @@ restaurants = [
         "location": "Hyderabad",
         "cuisine": "South Indian",
         "rating": 4.6,
-        "image": "/images/restaurant-1.svg"
+        "image": "https://images.pexels.com/photos/8818667/pexels-photo-8818667.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "restaurant_id": 202,
@@ -36,7 +36,7 @@ restaurants = [
         "location": "Bangalore",
         "cuisine": "Italian",
         "rating": 4.3,
-        "image": "/images/restaurant-2.svg"
+        "image": "https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "restaurant_id": 203,
@@ -45,7 +45,7 @@ restaurants = [
         "location": "Mumbai",
         "cuisine": "Chinese",
         "rating": 4.4,
-        "image": "/images/restaurant-3.svg"
+        "image": "https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "restaurant_id": 204,
@@ -54,7 +54,7 @@ restaurants = [
         "location": "Delhi",
         "cuisine": "North Indian",
         "rating": 4.5,
-        "image": "/images/restaurant-4.svg"
+        "image": "https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     }
 ]
 restaurants_col.insert_many(restaurants)
@@ -67,7 +67,7 @@ foods = [
         "category": "Main Course",
         "price": 299,
         "availability": "Available",
-        "image": "/images/food-1.svg"
+        "image": "https://images.pexels.com/photos/28909537/pexels-photo-28909537.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 302,
@@ -76,7 +76,7 @@ foods = [
         "category": "Main Course",
         "price": 249,
         "availability": "Available",
-        "image": "/images/food-2.svg"
+        "image": "https://images.pexels.com/photos/2569760/pexels-photo-2569760.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 303,
@@ -85,7 +85,7 @@ foods = [
         "category": "Starters",
         "price": 120,
         "availability": "Available",
-        "image": "/images/food-3.svg"
+        "image": "https://images.pexels.com/photos/941869/pexels-photo-941869.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 304,
@@ -94,7 +94,7 @@ foods = [
         "category": "Desserts",
         "price": 80,
         "availability": "Available",
-        "image": "/images/food-4.svg"
+        "image": "https://images.pexels.com/photos/11887844/pexels-photo-11887844.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 305,
@@ -103,7 +103,7 @@ foods = [
         "category": "Starters",
         "price": 90,
         "availability": "Out of Stock",
-        "image": "/images/food-1.svg"
+        "image": "https://images.pexels.com/photos/8312083/pexels-photo-8312083.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 306,
@@ -112,7 +112,7 @@ foods = [
         "category": "Main Course",
         "price": 350,
         "availability": "Available",
-        "image": "/images/food-2.svg"
+        "image": "https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 307,
@@ -121,7 +121,7 @@ foods = [
         "category": "Main Course",
         "price": 280,
         "availability": "Available",
-        "image": "/images/food-3.svg"
+        "image": "https://images.pexels.com/photos/4518844/pexels-photo-4518844.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 308,
@@ -130,7 +130,7 @@ foods = [
         "category": "Starters",
         "price": 150,
         "availability": "Available",
-        "image": "/images/food-4.svg"
+        "image": "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 309,
@@ -139,7 +139,7 @@ foods = [
         "category": "Main Course",
         "price": 180,
         "availability": "Available",
-        "image": "/images/food-1.svg"
+        "image": "https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 310,
@@ -148,7 +148,7 @@ foods = [
         "category": "Starters",
         "price": 160,
         "availability": "Available",
-        "image": "/images/food-2.svg"
+        "image": "https://images.pexels.com/photos/6996084/pexels-photo-6996084.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 311,
@@ -157,7 +157,7 @@ foods = [
         "category": "Main Course",
         "price": 320,
         "availability": "Available",
-        "image": "/images/food-3.svg"
+        "image": "https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     },
     {
         "food_id": 312,
@@ -166,7 +166,7 @@ foods = [
         "category": "Starters",
         "price": 60,
         "availability": "Available",
-        "image": "/images/food-4.svg"
+        "image": "https://images.pexels.com/photos/1893556/pexels-photo-1893556.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&dpr=1"
     }
 ]
 foods_col.insert_many(foods)

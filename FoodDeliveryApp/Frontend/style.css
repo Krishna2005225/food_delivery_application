@@ -75,7 +75,9 @@ body {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    background: linear-gradient(135deg, rgba(255,107,53,0.85), rgba(247,147,30,0.85)), url('https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+    background-size: cover;
+    background-position: center;
     color: white;
     text-align: center;
     padding: 80px 20px;
@@ -209,6 +211,12 @@ body {
     height: 200px;
     object-fit: cover;
     display: block;
+    background-color: #f0f0f0;
+}
+
+.card-image img:not([src]),
+.card-image img[src=""] {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
 }
 
 .card:hover {
